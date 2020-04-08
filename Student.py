@@ -30,6 +30,8 @@ class Student:
     def _calculate_gpa(self) -> float:
         """ Method to calculate a return the students GPA """
         gpa: float = 0.0
+        if len(self._courses) == 0:
+            return gpa
         for grade in self._courses.values():
             gpa += self.grade_to_value[grade]
         return round(gpa / len(self._courses), 2)
