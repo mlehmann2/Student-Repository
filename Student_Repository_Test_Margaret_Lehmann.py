@@ -26,7 +26,7 @@ class UniversityTest(unittest.TestCase):
     def test_students_dictionary(self) -> None:
         """ Test the university classes student dict """
         expected = {'10103': ('10103', 'Baldwin, C', [
-                              'CS 501', 'SSW 564'], ['SSW 540'], [], 3.375)}
+                              'CS 501', 'SSW 564'], ['SSW 540'], [], 3.38)}
 
         univ: University.University = University.University('Syracuse')
         calculated = {cwid: student.prettytable_row()

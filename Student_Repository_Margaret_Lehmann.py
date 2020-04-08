@@ -136,14 +136,3 @@ class University:
             for row in instructor.prettytable_rows():
                 pt.add_row(row)
         print(pt)
-
-
-def main():
-    print('here')
-    x = University('Stevens')
-    x.pretty_print_majors()
-    x.pretty_print_students()
-    x.pretty_print_instructors()
-
-
-main()
