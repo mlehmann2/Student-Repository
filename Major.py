@@ -28,15 +28,15 @@ class Major:
             print(
                 f'{type} is an invalid type for course {course}. - Not adding course to major {self._name}')
 
-    def get_remain_courses(self, course_dict: Dict[str, str]) -> Tuple[Set[str], Set[str]]:
+    def get_course_summary(self, course_dict: Dict[str, str]) -> Tuple[Set[str], Set[str], Set[str]]:
         """ Method to return remaining courses given a set of courses """
         courses = set(
             [course for course, grade in course_dict.items() if grade in self.passing_grades])
 
         if courses.intersection(self._electives) == set():
-            return self._required.difference(courses), self._electives
+            return courses, self._required.difference(courses), self._electives
         else:
-            return self._required.difference(courses), {}
+            return courses, self._required.difference(courses), {}
 
     def prettytable_row(self) -> Tuple[str, str, List[str]]:
         """ Method to return the data for a prettytable as a tuple """

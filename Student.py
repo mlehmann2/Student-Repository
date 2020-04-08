@@ -36,7 +36,7 @@ class Student:
 
     def prettytable_row(self) -> Tuple[str, str, List[str]]:
         """ Method to return the data for a prettytable as a tuple """
-        required_remaining, electives = self._major.get_remain_courses(
+        complete, required, electives = self._major.get_course_summary(
             self._courses)
 
-        return self._cwid, self._name, sorted(self._courses.keys()), sorted(required_remaining), sorted(electives), self._calculate_gpa()
+        return self._cwid, self._name, sorted(complete), sorted(required), sorted(electives), self._calculate_gpa()
