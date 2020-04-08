@@ -3,11 +3,13 @@
 This program collects university data repository and stores it as classes, and students, and instructors.
 """
 
+from collections import defaultdict
 from prettytable import PrettyTable
-from typing import Tuple, Iterator, Dict, IO
+from typing import Tuple, Iterator, Dict, IO, List
 import os
 import Student
 import Instructor
+import Major
 
 
 class University:
@@ -19,11 +21,14 @@ class University:
         self._students_dict: Dict[str, Student.Student] = dict()
         # CWID to Instructor
         self._instructors_dict: Dict[str, Instructor.Instructor] = dict()
+        # Major to Major data
+        self._major_dict: Dict[str, Major.Major] = dict()
 
         # Verify directory exists
         self._univ_directory = univ_directory
         if os.path.isdir(self._univ_directory):
             # Populate the students, instructors, and grades
+            self._populate_majors()
             self._populate_students()
             self._populate_instructors()
             self._populate_grades()
@@ -32,19 +37,34 @@ class University:
             raise FileNotFoundError(
                 f"{self._univ_directory} is not a valid university.")
 
+    def _populate_majors(self) -> None:
+        """ Method to populate major data for a major """
+        path: str = os.path.join(self._univ_directory, 'majors.txt')
+        reader = self._file_reader(path, 3, sep='\t', header=True)
+        for name, type, course in reader:
+            # Verify instructor and student exist
+            if name not in self._major_dict.keys():
+                self._major_dict[name] = Major.Major(name)
+            self._major_dict[name].add_course(type, course)
+
     def _populate_students(self) -> None:
         """ Method to populate the Student data dictionary """
         # Populate the students
         path: str = os.path.join(self._univ_directory, 'students.txt')
-        reader = self._file_reader(path, 3, sep='\t', header=False)
+        reader = self._file_reader(path, 3, sep=';', header=True)
         for cwid, name, major in reader:
-            self._students_dict[cwid] = Student.Student(cwid, name, major)
+            if major in self._major_dict.keys():
+                self._students_dict[cwid] = Student.Student(
+                    cwid, name, self._major_dict[major])
+            else:
+                print(
+                    f'{major} is not a valid major. - Skipping Student {cwid}.')
 
     def _populate_instructors(self) -> None:
         """ Method to populate the Instructor data dictionary """
         # Populate the students
         path: str = os.path.join(self._univ_directory, 'instructors.txt')
-        reader = self._file_reader(path, 3, sep='\t', header=False)
+        reader = self._file_reader(path, 3, sep='|', header=True)
         for cwid, name, department in reader:
             self._instructors_dict[cwid] = Instructor.Instructor(
                 cwid, name, department)
@@ -52,20 +72,19 @@ class University:
     def _populate_grades(self) -> None:
         """ Method to populate grade and class data for students and instructors """
         path: str = os.path.join(self._univ_directory, 'grades.txt')
-        reader = self._file_reader(path, 4, sep='\t', header=False)
-        for grade_info in reader:
-            if grade_info[3] in self._instructors_dict.keys():
-                if grade_info[0] in self._students_dict.keys():
-                    self._students_dict[grade_info[0]].add_course(
-                        grade_info[1], grade_info[2])
-                    self._instructors_dict[grade_info[3]].add_course(
-                        grade_info[1])
+        reader = self._file_reader(path, 4, sep='|', header=True)
+        for s_cwid, course, grade, i_cwid in reader:
+            # Verify instructor and student exist
+            if i_cwid in self._instructors_dict.keys():
+                if s_cwid in self._students_dict.keys():
+                    self._students_dict[s_cwid].add_course(course, grade)
+                    self._instructors_dict[i_cwid].add_course(course)
                 else:
                     print(
-                        f'{grade_info[0]} is not a valid student CWID. - Skipping grade.')
+                        f'{s_cwid} is not a valid student CWID. - Skipping grade.')
             else:
                 print(
-                    f'{grade_info[3]} is not a valid instructor CWID. - Skipping grade.')
+                    f'{i_cwid} is not a valid instructor CWID. - Skipping grade.')
 
     def _file_reader(self, path: str, fields: int, sep: str = ',',
                      header: bool = False) -> Iterator[Tuple[str]]:
@@ -87,6 +106,16 @@ class University:
                     else:
                         yield ret
 
+    def pretty_print_majors(self) -> None:
+        """ Method to print the student dictionary as a pretty table """
+        print(f"Summary for {self._univ_directory} majors.")
+
+        pt: PrettyTable = PrettyTable(
+            field_names=Major.Major.prettytable_header)
+        for major in self._major_dict.values():
+            pt.add_row(major.prettytable_row())
+        print(pt)
+
     def pretty_print_students(self) -> None:
         """ Method to print the student dictionary as a pretty table """
         print(f"Summary for {self._univ_directory} students.")
@@ -107,3 +136,14 @@ class University:
             for row in instructor.prettytable_rows():
                 pt.add_row(row)
         print(pt)
+
+
+def main():
+    print('here')
+    x = University('Stevens')
+    x.pretty_print_majors()
+    x.pretty_print_students()
+    x.pretty_print_instructors()
+
+
+main()

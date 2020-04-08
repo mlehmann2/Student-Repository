@@ -3,12 +3,13 @@
 This file contains the Major class for out Univeristy data tracking program.
 """
 
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Set
 
 
 class Major:
     """ Class to hold Major data """
     prettytable_header: List[str] = ['Major', 'Required Courses', 'Electives']
+
     passing_grades: List[str] = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']
 
     def __init__(self, name: str) -> None:
@@ -27,8 +28,15 @@ class Major:
             print(
                 f'{type} is an invalid type for course {course}. - Not adding course to major {self._name}')
 
-    def hold(self) -> float:
-        """ Method to calculate a return the students GPA """
+    def get_remain_courses(self, course_dict: Dict[str, str]) -> Tuple[Set[str], Set[str]]:
+        """ Method to return remaining courses given a set of courses """
+        courses = set(
+            [course for course, grade in course_dict.items() if grade in self.passing_grades])
+
+        if courses.intersection(self._electives) == set():
+            return self._required.difference(courses), self._electives
+        else:
+            return self._required.difference(courses), {}
 
     def prettytable_row(self) -> Tuple[str, str, List[str]]:
         """ Method to return the data for a prettytable as a tuple """

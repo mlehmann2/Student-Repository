@@ -1,1 +1,2 @@
-10103	Baldwin, C	SFEN
+CWID;Name;Major
+10103;Baldwin, C;SFEN
