@@ -1,0 +1,4 @@
+Major	Required/Elective	Course
+SFEN	R	SSW 540
+SFEN	R	SSW 564
+SFEN	E	CS 501

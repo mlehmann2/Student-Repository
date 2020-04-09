@@ -13,9 +13,20 @@ import Instructor
 class UniversityTest(unittest.TestCase):
     """ Class to test the university data classes """
 
+    def test_majors_dictionary(self) -> None:
+        """ Test the university classes student dict """
+        expected = {'SFEN': ('SFEN', ['SSW 540', 'SSW 564'], ['CS 501'])}
+
+        univ: University.University = University.University('Syracuse')
+        calculated = {name: major.prettytable_row()
+                      for name, major in univ._major_dict.items()}
+
+        self.assertEqual(expected, calculated)
+
     def test_students_dictionary(self) -> None:
         """ Test the university classes student dict """
-        expected = {'10103': ('10103', 'Baldwin, C', ['CS 501', 'SSW 564'])}
+        expected = {'10103': ('10103', 'Baldwin, C', [
+                              'CS 501', 'SSW 564'], ['SSW 540'], [], 3.38)}
 
         univ: University.University = University.University('Syracuse')
         calculated = {cwid: student.prettytable_row()
@@ -29,6 +40,7 @@ class UniversityTest(unittest.TestCase):
                     ('98764', 'Feynman, R', 'SFEN', 'CS 501', 1)}
 
         univ: University.University = University.University('Syracuse')
+
         calculated = {info for instructor in univ._instructors_dict.values()
                       for info in instructor.prettytable_rows()}
 

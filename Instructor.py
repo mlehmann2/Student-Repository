@@ -12,8 +12,6 @@ class Instructor:
     prettytable_header: List[str] = [
         'CWID', 'Name', 'Dept', 'Course', 'Students']
 
-    x = 2
-
     def __init__(self, cwid: str, name: str, department: str) -> None:
         """ Method to initialize a Student """
         self._cwid: str = cwid
