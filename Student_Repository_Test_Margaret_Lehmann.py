@@ -56,6 +56,24 @@ class UniversityTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             univ: University.University = University.University('Cornell')
 
+    def test_student_grades_table_db(self) -> None:
+        """ Test the method that queries the database """
+        expected = [('Bezos, J', '10115', 'SSW 810', 'A', 'Rowland, J'),
+                    ('Bezos, J', '10115', 'CS 546', 'F', 'Hawking, S'),
+                    ('Gates, B', '11714', 'SSW 810', 'B-', 'Rowland, J'),
+                    ('Gates, B', '11714', 'CS 546', 'A', 'Cohen, R'),
+                    ('Gates, B', '11714', 'CS 570', 'A-', 'Hawking, S'),
+                    ('Jobs, S', '10103', 'SSW 810', 'A-', 'Rowland, J'),
+                    ('Jobs, S', '10103', 'CS 501', 'B', 'Hawking, S'),
+                    ('Musk, E', '10183', 'SSW 555', 'A', 'Rowland, J'),
+                    ('Musk, E', '10183', 'SSW 810', 'A', 'Rowland, J')]
+
+        univ: University.University = University.University('Stevens')
+        iter = univ._database_query(
+            "/Users/Margie/Desktop/SSW-810 Spring 2020/university_database.db")
+
+        self.assertEqual(expected, list(iter))
+
 
 if __name__ == '__main__':
     unittest.main(exit=False, verbosity=2)

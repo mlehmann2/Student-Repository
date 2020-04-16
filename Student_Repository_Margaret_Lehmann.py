@@ -7,6 +7,7 @@ from collections import defaultdict
 from prettytable import PrettyTable
 from typing import Tuple, Iterator, Dict, IO, List
 import os
+import sqlite3
 import Student
 import Instructor
 import Major
@@ -51,7 +52,7 @@ class University:
         """ Method to populate the Student data dictionary """
         # Populate the students
         path: str = os.path.join(self._univ_directory, 'students.txt')
-        reader = self._file_reader(path, 3, sep=';', header=True)
+        reader = self._file_reader(path, 3, sep='\t', header=True)
         for cwid, name, major in reader:
             if major in self._major_dict.keys():
                 self._students_dict[cwid] = Student.Student(
@@ -64,7 +65,7 @@ class University:
         """ Method to populate the Instructor data dictionary """
         # Populate the students
         path: str = os.path.join(self._univ_directory, 'instructors.txt')
-        reader = self._file_reader(path, 3, sep='|', header=True)
+        reader = self._file_reader(path, 3, sep='\t', header=True)
         for cwid, name, department in reader:
             self._instructors_dict[cwid] = Instructor.Instructor(
                 cwid, name, department)
@@ -72,7 +73,7 @@ class University:
     def _populate_grades(self) -> None:
         """ Method to populate grade and class data for students and instructors """
         path: str = os.path.join(self._univ_directory, 'grades.txt')
-        reader = self._file_reader(path, 4, sep='|', header=True)
+        reader = self._file_reader(path, 4, sep='\t', header=True)
         for s_cwid, course, grade, i_cwid in reader:
             # Verify instructor and student exist
             if i_cwid in self._instructors_dict.keys():
@@ -136,3 +137,31 @@ class University:
             for row in instructor.prettytable_rows():
                 pt.add_row(row)
         print(pt)
+
+    def student_grades_table_db(self, db_path) -> None:
+        """ Method to pretty print the student grades table """
+        print(f"Summary for {self._univ_directory} student's grades.")
+
+        pt: PrettyTable = PrettyTable(
+            field_names=['Name', 'CWID', 'Course', 'Grade', 'Instructor'])
+
+        for row in self._database_query(db_path):
+            pt.add_row(row)
+
+        print(pt)
+
+    def _database_query(self,
+                        db_path) -> Iterator[Tuple[str, str, str, str, str]]:
+        """ Generator to query the university DB and return a student grades row one at a time """
+        try:
+            db: sqlite3.Connection = sqlite3.connect(db_path)
+        except sqlite3.OperationalError:
+            print(f"The path to the database is not a proper DB: {db_path}")
+        else:
+            query: str = """ SELECT s.Name, s.CWID, g.Course, g.Grade, i.Name
+            FROM students s JOIN grades g ON s.CWID = g.StudentCWID
+            JOIN instructors i ON g.InstructorCWID = i.CWID
+            ORDER BY s.Name """
+
+            for row in db.execute(query):
+                yield row
