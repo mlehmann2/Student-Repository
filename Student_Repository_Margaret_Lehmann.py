@@ -153,12 +153,15 @@ class University:
     def _database_query(self,
                         db_path) -> Iterator[Tuple[str, str, str, str, str]]:
         """ Generator to query the university DB and return a student grades row one at a time """
-        db: sqlite3.Connection = sqlite3.connect(db_path)
+        try:
+            db: sqlite3.Connection = sqlite3.connect(db_path)
+        except sqlite3.OperationalError:
+            print(f"The path to the database is not a proper DB: {db_path}")
+        else:
+            query: str = """ SELECT s.Name, s.CWID, g.Course, g.Grade, i.Name
+            FROM students s JOIN grades g ON s.CWID = g.StudentCWID
+            JOIN instructors i ON g.InstructorCWID = i.CWID
+            ORDER BY s.Name """
 
-        query: str = """ SELECT s.Name, s.CWID, g.Course, g.Grade, i.Name
-        FROM students s JOIN grades g ON s.CWID = g.StudentCWID
-        JOIN instructors i ON g.InstructorCWID = i.CWID
-        ORDER BY s.Name """
-
-        for row in db.execute(query):
-            yield row
+            for row in db.execute(query):
+                yield row
