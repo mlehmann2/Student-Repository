@@ -150,13 +150,13 @@ class University:
         pt: PrettyTable = PrettyTable(
             field_names=['Name', 'CWID', 'Course', 'Grade', 'Instructor'])
 
-        for row in self._database_query(db_path):
+        for row in self.database_query(db_path):
             pt.add_row(row)
 
         print(pt)
 
-    def _database_query(self,
-                        db_path) -> Iterator[Tuple[str, str, str, str, str]]:
+    def database_query(self,
+                       db_path) -> Iterator[Tuple[str, str, str, str, str]]:
         """ Generator to query the university DB and return a student grades row one at a time """
         try:
             db: sqlite3.Connection = sqlite3.connect(db_path)
@@ -175,21 +175,15 @@ class University:
 @app.route('/Student_data')
 def template_demo() -> str:
     """ Function for the Student_data webpage """
-    try:
-        db: sqlite3.Connection = sqlite3.connect(path_DB)
-    except sqlite3.OperationalError:
-        print(f"The path to the database is not a proper DB: {db_path}")
-    else:
-        query: str = """ SELECT s.Name, s.CWID, g.Course, g.Grade, i.Name
-        FROM students s JOIN grades g ON s.CWID = g.StudentCWID
-        JOIN instructors i ON g.InstructorCWID = i.CWID
-        ORDER BY s.Name """
+    univ: University = University('Stevens')
+    data: List[Dict[str, str]] = [{'name': name,
+                                   'cwid': cwid,
+                                   'course': course,
+                                   'grade': grade,
+                                   'instructor': instructor}
+                                  for name, cwid, course, grade, instructor in list(univ.database_query(path_DB))]
 
-        data: List[Dict[str, str]] = [{'name': name, 'cwid': cwid,
-                                       'course': course, 'grade': grade, 'instructor': instructor}
-                                      for name, cwid, course, grade, instructor in db.execute(query)]
-
-        return render_template('student_data.html', title='Stevens Repository', my_header='Stevens Repository', table_header='Student Summary', students=data)
+    return render_template('student_data.html', title='Stevens Repository', my_header='Stevens Repository', table_header='Student Summary', students=data)
 
 
 app.run(debug=True)

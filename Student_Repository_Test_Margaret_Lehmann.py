@@ -69,7 +69,7 @@ class UniversityTest(unittest.TestCase):
                     ('Musk, E', '10183', 'SSW 810', 'A', 'Rowland, J')]
 
         univ: University.University = University.University('Stevens')
-        iter = univ._database_query(
+        iter = univ.database_query(
             "/Users/Margie/Desktop/SSW-810 Spring 2020/university_database.db")
 
         self.assertEqual(expected, list(iter))
