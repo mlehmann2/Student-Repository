@@ -11,6 +11,11 @@ import sqlite3
 import Student
 import Instructor
 import Major
+from flask import Flask, render_template
+
+app: Flask = Flask(__name__)
+
+path_DB: str = 'university_database.db'
 
 
 class University:
@@ -165,3 +170,26 @@ class University:
 
             for row in db.execute(query):
                 yield row
+
+
+@app.route('/Student_data')
+def template_demo() -> str:
+    """ Function for the Student_data webpage """
+    try:
+        db: sqlite3.Connection = sqlite3.connect(path_DB)
+    except sqlite3.OperationalError:
+        print(f"The path to the database is not a proper DB: {db_path}")
+    else:
+        query: str = """ SELECT s.Name, s.CWID, g.Course, g.Grade, i.Name
+        FROM students s JOIN grades g ON s.CWID = g.StudentCWID
+        JOIN instructors i ON g.InstructorCWID = i.CWID
+        ORDER BY s.Name """
+
+        data: List[Dict[str, str]] = [{'name': name, 'cwid': cwid,
+                                       'course': course, 'grade': grade, 'instructor': instructor}
+                                      for name, cwid, course, grade, instructor in db.execute(query)]
+
+        return render_template('student_data.html', title='Stevens Repository', my_header='Stevens Repository', table_header='Student Summary', students=data)
+
+
+app.run(debug=True)
